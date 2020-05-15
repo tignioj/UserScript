@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GDPU_jkdk/GDPU_jkdk.iml" filepath="$PROJECT_DIR$/GDPU_jkdk/GDPU_jkdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/UserScriptDemo.iml" filepath="$PROJECT_DIR$/UserScriptDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/speed_change/speed_change.iml" filepath="$PROJECT_DIR$/speed_change/speed_change.iml" />
     </modules>
   </component>
 </project>
