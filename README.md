@@ -18,31 +18,40 @@ http://www.tampermonkey.net/
 以 https://greasyfork.org  这个网址举例
 
 #### 1. 比如我要一个b站的视频变速脚本, 首先搜索视频变速器
+
 ![](imgs/video_speed_change.png)
 
 #### 2. 拉到下面，找到搜索结果
+
 ![](imgs/video_speed_change_result.png)
 
 #### 3. 点进去，点击绿色的按钮"install this script"
+
 ![](imgs/video_speed_change_install.png)
 
 #### 4. 最后，点击这个, 就可以成功安装啦
+
 ![](imgs/video_speed_change_install_finall.png)
 
 ### 方法二: 复制本项目下的脚本
 #### 1. 找到脚本的位置
+
 ![](imgs/script_raw.png)
 
 #### 2. 全选复制
+
 ![](imgs/script_copy_all.png)
 
 #### 3. 添加脚本
+
 ![](imgs/create_new_script.png)
 
 #### 4. 粘贴脚本
+
 ![](imgs/script_paste_all.png)
 
 #### 5. 保存脚本
+
 ![](imgs/save_script.png)
 
 
