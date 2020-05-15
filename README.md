@@ -36,7 +36,7 @@ http://www.tampermonkey.net/
 
 ![安装脚本1](imgs/video_speed_change_install.png)
 
-#### 4. 最后，点击这个, 就可以成功安装啦
+#### 4. 最后，点击install, 就可以成功安装啦
 
 ![安装脚本2](imgs/video_speed_change_install_finall.png)
 
