@@ -2,7 +2,7 @@
 // @name         视频变速器0.23
 // @namespace    http://tampermonkey.net/
 // @version      0.23
-// @description  默认三倍速 ‘Ctrl+Alt+, 视频减速0.25, ‘Ctrl+Alt+.’视频加速速0.25, Ctrl+Alt+数字键则改为对应的速度, Ctrl+Alt+h 彻底隐藏窗口
+// @description  默认两倍速 ‘Ctrl+Alt+, 视频减速0.25, ‘Ctrl+Alt+.’视频加速速0.25, Ctrl+Alt+数字键则改为对应的速度, Ctrl+Alt+h 彻底隐藏窗口
 // @author       tignioj
 // @match      *://*/*
 // @exclude    https://cn.bing.com/?toWww*
@@ -108,8 +108,8 @@
     slider.type = "range";
     slider.value = globalRate;
     slider.oninput = function (ev) {
-        ev.stopPropagation();
         //防止事件被父元素捕捉
+        ev.stopPropagation();
         speedChange(this.value);
     }
 
@@ -148,7 +148,6 @@
     appDiv.appendChild(sliderContainer);
 
 
-
     /**
      * 更改速度
      * @param rate
@@ -168,7 +167,7 @@
 
         for (let i = 0; i < videos.length; i++) {
             let video = videos[i];
-            if (video.playbackRate != rate) {
+            if (video.playbackRate !== rate) {
                 video.playbackRate = rate;
                 changeShowValue(rate);
             }
@@ -187,12 +186,14 @@
         // if (video.length > 1) {
         //     throw "视频数量过多，无法指定";
         // }
+
+
         return videos;
     }
 
 //设置全局速度
-    var DEFAULT_RATE = 3;
-    var globalRate = 3;
+    var DEFAULT_RATE = 2;
+    var globalRate = DEFAULT_RATE;
 
 
     /**
@@ -208,6 +209,9 @@
     var retryTime = 0;
 
 
+    /**
+     * 加载窗口
+     */
     function loadApp() {
         console.log("加载App")
 
@@ -215,6 +219,9 @@
         var targArea = document;
         targArea.addEventListener('keydown', reportKeyEvent);
 
+        /**
+         * 根据按键响应不同的行为
+         */
         function reportKeyEvent(zEvent) {
             //--- Was a Ctrl-Alt- combo pressed?
             if (zEvent.ctrlKey && zEvent.altKey) {  // case sensitive
@@ -243,7 +250,7 @@
         }
 
         document.body.appendChild(appDiv);
-    };
+    }
 
     /**
      * 设置整个appDiv是否显示
@@ -287,7 +294,7 @@
     }
 
 
-    window.onload = function () {
+    window.addEventListener('click', function () {
         // console.log("加载文档完毕");
         try {
             //如果没有video则会抛异常
@@ -298,5 +305,5 @@
         } catch (e) {
             // console.error("出错:" , e, "对应文档", document);
         }
-    }
+    });
 })();
