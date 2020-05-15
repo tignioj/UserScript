@@ -1,4 +1,11 @@
 # 个人油猴脚本集合
+## 导航
+- [视频变速器](https://github.com/tignioj/UserScript/tree/master/speed_change)
+- [广东药科大学学工处健康打卡-只提交健康信息](https://github.com/tignioj/UserScript/tree/master/GDPU_jkdk)
+
+## 有问题请开issue, 看不到图片请用Chrome浏览器
+
+
 ## 一、什么是油猴脚本？
 可以在浏览器上执行的js代码，而无需打开控制台。
 
