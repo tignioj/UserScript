@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         视频变速器0.23
-// @namespace    http://tampermonkey.net/
-// @version      0.23
+// @name         视频变速器
+// @namespace    https://github.com/tignioj/UserScript/tree/master/speed_change
+// @version      0.24
 // @description  默认两倍速 ‘Ctrl+Alt+, 视频减速0.25, ‘Ctrl+Alt+.’视频加速速0.25, Ctrl+Alt+数字键则改为对应的速度, Ctrl+Alt+h 彻底隐藏窗口
 // @author       tignioj
 // @match      *://*/*
@@ -52,7 +52,8 @@
     toggleBtn.innerText = "隐藏";
     setStylesOnElement({
         border: "1px solid red",
-        float: "right"
+        float: "right",
+        cursor:'pointer',
     }, toggleBtn);
 
 
@@ -89,11 +90,11 @@
 //显示速度
     function changeShowValue(v) {
         slider.value = v;
-        infoEle.innerText = "‘Ctrl+Alt+,’视频减速0.25 \n" +
-            "‘Ctrl+Alt+.’视频加速速0.25 \n" +
-            "Ctrl+Alt+数字键 \n" +
-            "则改为对应的速度 \n" +
-            "Ctrl+Alt+h 彻底隐藏窗口\n" +
+        infoEle.innerText = "'Ctrl+Alt+,'视频减速0.25 \n" +
+            "'Ctrl+Alt+.' 视频加速0.25 \n" +
+            "'Ctrl+Alt+数字键' \n" +
+            "则改速度为(数字*0.5) \n" +
+            "'Ctrl+Alt+h' 彻底隐藏窗口\n" +
             "当前速度" + v;
     }
 
@@ -117,8 +118,10 @@
     var btnGroup = document.createElement("div");
     btnGroup.appendChild(getBtn(0.75));
     btnGroup.appendChild(getBtn(1));
+    btnGroup.appendChild(getBtn(1.25));
     btnGroup.appendChild(getBtn(2));
-    btnGroup.appendChild(getBtn(3));
+    btnGroup.appendChild(getBtn(2.25));
+    btnGroup.appendChild(getBtn(2.5));
 
 
 //创建按钮组同时给按钮添加监听
@@ -217,7 +220,8 @@
 
         //检测按键行为
         var targArea = document;
-        targArea.addEventListener('keydown', reportKeyEvent);
+        //targArea.addEventListener('keydown', reportKeyEvent);
+        targArea.onkeydown=reportKeyEvent;
 
         /**
          * 根据按键响应不同的行为
@@ -235,12 +239,15 @@
                     case "/":
                         speedChange(DEFAULT_RATE);
                         break;
+                    case "`":
+                        speedChange(1);
+                        break;
                     case "h":
                         toogleApp();
                 }
-                for (var i = 0; i <= 9; i++) {
+                for (var i = 1; i <= 9; i++) {
                     if (String(i) === zEvent.key) {
-                        speedChange(i)
+                        speedChange(i*0.5);
                     }
                 }
             }
@@ -284,6 +291,50 @@
         }, 1000);
     }
 
+//感谢https://github.com/xxxily/h5player 提供的hack视频信息
+    /**
+     * 某些网页用了attachShadow closed mode，需要open才能获取video标签，例如百度云盘
+     * 解决参考：
+     * https://developers.google.com/web/fundamentals/web-components/shadowdom?hl=zh-cn#closed
+     * https://stackoverflow.com/questions/54954383/override-element-prototype-attachshadow-using-chrome-extension
+     */
+    function hackAttachShadow () {
+        if (window._hasHackAttachShadow_) return
+        try {
+            window._shadowDomList_ = [];
+            window.Element.prototype._attachShadow = window.Element.prototype.attachShadow;
+            window.Element.prototype.attachShadow = function () {
+                const arg = arguments;
+                if (arg[0] && arg[0].mode) {
+                    // 强制使用 open mode
+                    arg[0].mode = 'open';
+                }
+                const shadowRoot = this._attachShadow.apply(this, arg);
+                // 存一份shadowDomList
+                window._shadowDomList_.push(shadowRoot);
+
+                // 在document下面添加 addShadowRoot 自定义事件
+                const shadowEvent = new window.CustomEvent('addShadowRoot', {
+                    shadowRoot,
+                    detail: {
+                        shadowRoot,
+                        message: 'addShadowRoot',
+                        time: new Date()
+                    },
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.dispatchEvent(shadowEvent);
+                return shadowRoot
+            };
+            window._hasHackAttachShadow_ = true;
+        } catch (e) {
+            console.error('hackAttachShadow error by h5player plug-in');
+        }
+    }
+
+
+
     /**
      * 程序入口
      */
@@ -294,9 +345,11 @@
     }
 
 
-    window.addEventListener('click', function () {
-        // console.log("加载文档完毕");
+    window.addEventListener('load', function () {
+        console.log("加载文档完毕");
         try {
+            hackAttachShadow();
+
             //如果没有video则会抛异常
             getVideoEleFromDocument();
 
