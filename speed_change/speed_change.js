@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         视频变速器
 // @namespace    https://github.com/tignioj/UserScript/tree/master/speed_change
-// @version      0.24
-// @description  默认两倍速 ‘Ctrl+Alt+, 视频减速0.25, ‘Ctrl+Alt+.’视频加速速0.25, Ctrl+Alt+数字键则改为对应的速度, Ctrl+Alt+h 彻底隐藏窗口
+// @version      0.25
+// @description  快捷键变速，默认两倍速 ','视频减速0.25, '.'视频加速速0.25, 数字键则改为对应的速度*0.5, h 彻底隐藏窗口
 // @author       tignioj
 // @match      *://*/*
 // @exclude    https://cn.bing.com/?toWww*
@@ -48,21 +48,24 @@
     title.id = "title";
     title.innerText = "视频变速器";
 
+
     var toggleBtn = document.createElement("span");
+    var currentValueShow = document.createElement("span");
+    currentValueShow.innerText = 'x'; //顶部显示当前速度
     toggleBtn.innerText = "隐藏";
     setStylesOnElement({
         border: "1px solid red",
         float: "right",
         cursor:'pointer',
-    }, toggleBtn);
+    }, toggleBtn,currentValueShow);
 
-
-    var isHidden = false;
     toggleBtn.onclick = toogleWindow;
 
 
     function toogleWindow() {
-        if (!isHidden) {
+        var t = toggleBtn.innerText;
+        console.log(t);
+        if (t == "隐藏") {
             toggleBtn.innerText = "显示";
             setStylesOnElement({
                 display: "none",
@@ -73,11 +76,11 @@
                 display: "inline-block",
             }, title, sliderContainer)
         }
-        isHidden = !isHidden;
     }
 
     headerDiv.appendChild(title);
     headerDiv.appendChild(toggleBtn);
+    headerDiv.appendChild(currentValueShow);
 
     var infoEle = document.createElement("div");
 
@@ -90,11 +93,11 @@
 //显示速度
     function changeShowValue(v) {
         slider.value = v;
-        infoEle.innerText = "'Ctrl+Alt+,'视频减速0.25 \n" +
-            "'Ctrl+Alt+.' 视频加速0.25 \n" +
-            "'Ctrl+Alt+数字键' \n" +
-            "则改速度为(数字*0.5) \n" +
-            "'Ctrl+Alt+h' 彻底隐藏窗口\n" +
+        currentValueShow.innerText = v;
+        infoEle.innerText = "','视频减速0.25 \n" +
+            "'.' 视频加速0.25 \n" +
+            "'数字键'变速为(数字*0.5) \n" +
+            "'h' 彻底隐藏窗口\n" +
             "当前速度" + v;
     }
 
@@ -190,7 +193,6 @@
         //     throw "视频数量过多，无法指定";
         // }
 
-
         return videos;
     }
 
@@ -228,7 +230,7 @@
          */
         function reportKeyEvent(zEvent) {
             //--- Was a Ctrl-Alt- combo pressed?
-            if (zEvent.ctrlKey && zEvent.altKey) {  // case sensitive
+            //if (zEvent.ctrlKey && zEvent.altKey) {  // case sensitive
                 switch (zEvent.key) {
                     case ",":
                         speedChange(globalRate - 0.25)
@@ -240,7 +242,7 @@
                         speedChange(DEFAULT_RATE);
                         break;
                     case "`":
-                        speedChange(1);
+                        speedChange(2.5);
                         break;
                     case "h":
                         toogleApp();
@@ -250,7 +252,7 @@
                         speedChange(i*0.5);
                     }
                 }
-            }
+            //}
 
             //zEvent.stopPropagation ();
             //zEvent.preventDefault ()
@@ -339,7 +341,8 @@
      * 程序入口
      */
     function main() {
-        setAppIsShow(true);
+        setAppIsShow(true); //显示窗口
+        toogleWindow(); //隐藏详细内容
         loadApp();
         loopWatch();
     }
@@ -349,14 +352,14 @@
         console.log("加载文档完毕");
         try {
             hackAttachShadow();
-
             //如果没有video则会抛异常
             getVideoEleFromDocument();
 
             main();
             // console.log("成功:", "对应的文档", document)
         } catch (e) {
-            // console.error("出错:" , e, "对应文档", document);
+            console.error("出错:" , e, "对应文档", document);
         }
-    });
+
+    },1000);
 })();
