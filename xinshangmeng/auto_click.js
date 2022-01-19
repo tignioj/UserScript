@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         新商盟订烟自动点击
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/tignioj/UserScript/tree/master/xinshangmeng
 // @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @description  新商盟订烟每次需要手动请求可用量，用这个脚本自动获取可用量。有多少点多少。
+// @author       tignioj
 // @match        http://gd.xinshangmeng.com:9090/eciop/orderForCC/cgtListForCC.htm?*
 // @icon         https://www.google.com/s2/favicons?domain=xinshangmeng.com
 // @grant        none
