@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         新商盟订烟自动点击
 // @namespace    https://github.com/tignioj/UserScript/tree/master/xinshangmeng
-// @version      0.1
+// @version      0.2
 // @description  新商盟订烟每次需要手动请求可用量，用这个脚本自动获取可用量。有多少点多少。
 // @author       tignioj
 // @match        http://gd.xinshangmeng.com:9090/eciop/orderForCC/cgtListForCC.htm?*
@@ -62,7 +62,7 @@
         // 获取加号列表
         let adds = document.querySelectorAll(".adda");
         for (let i = 0; i < adds.length; i++) {
-        // for (let i = 5; i < 10; i++) {
+            // for (let i = 5; i < 10; i++) {
             let ele = adds[i];
             ele.dispatchEvent(getEvt(EVENT_MOUSE_ENTER))
             ele.dispatchEvent(getEvt(EVENT_MOUSE_CLICK))
@@ -99,7 +99,7 @@
             let eleInput = ele.getElementsByClassName("xsm-order-list-shuru-input")[0];
             // 没有显示可用量，说明上一轮的点击失败了
             if (limitNum.trim() !== '--') {
-                eleInput.value = limitNum;
+                eleInput.value = String(parseInt(limitNum) * 2);
                 // 移动鼠标
                 adda.dispatchEvent(getEvt(EVENT_MOUSE_OUT))
 
