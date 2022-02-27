@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         新商盟订烟自动点击
 // @namespace    https://github.com/tignioj/UserScript/tree/master/xinshangmeng
-// @version      0.3
-// @description  新商盟订烟每次需要手动请求可用量，用这个脚本自动获取可用量。有多少点多少。
+// @version      0.4
+// @description  新商盟订烟每次需要手动请求可用量，用这个脚本自动获取可用量。可隐藏可用量为0的订单。
 // @author       tignioj
 // @match        http://gd.xinshangmeng.com:9090/eciop/orderForCC/cgtListForCC.htm?*
-// @icon         https://www.google.com/s2/favicons?domain=xinshangmeng.com
 // @grant        none
 // ==/UserScript==
 
@@ -37,6 +36,23 @@
         }
     ;
 
+    function showLimitZeroColumn(b) {
+        let rows = document.querySelectorAll(".xsm-utable-body");
+        for (let i = 0; i < rows.length; i++) {
+            let ele = rows[i];
+            let eleActual = ele.getElementsByClassName("cgt-col-qtl-lmt")[0];
+            let limitNum = eleActual.textContent;
+            if (limitNum === '0') {
+                if (b) {
+                    ele.style.display = "block"
+                } else {
+                    ele.style.display = "none"
+                }
+            }
+        }
+
+    }
+
     // 创建UI
     function createUI() {
         // 创建窗体
@@ -62,33 +78,37 @@
 
 
         // 创建按钮
-        let buttonEle = document.createElement("button");
-        buttonEle.id = "auto_click_button_ele_1"
-        buttonEle.textContent = "一键1倍"
-        buttonEle.addEventListener("click", function () {
-            oneClickOrder(1);
-        });
-        setStylesOnElement({
-            position: "relative",
-            cursor: "pointer",
-            fontSize: "3em",
-            boxShadow: "4px 4px 3px black"
-        }, buttonEle);
+        let buttonOneEle = document.createElement("button");
+        buttonOneEle.id = "auto_click_button_ele_1"
+        buttonOneEle.textContent = "一键1倍"
+        buttonOneEle.addEventListener("click", function () { oneClickOrder(1); });
 
         let buttonDoubleEle = document.createElement("button");
         buttonDoubleEle.id = "auto_click_button_ele_2"
         buttonDoubleEle.textContent = "一键2倍"
-        buttonDoubleEle.addEventListener("click", function () {
-            oneClickOrder(2)
-        });
+        buttonDoubleEle.addEventListener("click", function () { oneClickOrder(2) });
+
+
+        let buttonToggleZeroColumn = document.createElement("button");
+        buttonToggleZeroColumn.textContent = "隐藏可用量为0的订单"
+        buttonToggleZeroColumn.onclick = function () {
+            if (buttonToggleZeroColumn.textContent.startsWith("隐藏")) {
+                showLimitZeroColumn(false);
+                buttonToggleZeroColumn.textContent = "显示可用量为0的订单"
+            } else {
+                showLimitZeroColumn(true);
+                buttonToggleZeroColumn.textContent = "隐藏可用量为0的订单"
+            }
+        }
+
         setStylesOnElement({
             position: "relative",
             cursor: "pointer",
-            fontSize: "3em",
-            boxShadow: "4px 4px 3px black"
-        }, buttonDoubleEle);
+            fontSize: "2em",
+            boxShadow: "3px 4px 3px black"
+        }, buttonOneEle, buttonDoubleEle, buttonToggleZeroColumn);
 
-        // 隐藏按钮
+        // 隐藏UI按钮
         const buttonHideEle = document.createElement("button");
         buttonHideEle.textContent = "隐藏"
         setStylesOnElement({
@@ -99,14 +119,16 @@
             fontSize: "1.2em"
         }, buttonHideEle)
         buttonHideEle.onclick = function () {
-            if (buttonHideEle.textContent === "隐藏" ) {
-                buttonEle.style.display = "none"
+            if (buttonHideEle.textContent === "隐藏") {
+                buttonOneEle.style.display = "none"
                 buttonDoubleEle.style.display = "none"
+                buttonToggleZeroColumn.style.display = "none"
                 divEle.style.opacity = "30%"
                 buttonHideEle.textContent = "显示"
             } else {
-                buttonEle.style.display = "inline-block"
+                buttonOneEle.style.display = "inline-block"
                 buttonDoubleEle.style.display = "inline-block"
+                buttonToggleZeroColumn.style.display = "inline-block"
                 divEle.style.opacity = "100%"
                 buttonHideEle.textContent = "隐藏"
             }
@@ -115,8 +137,9 @@
         // 添加元素到窗体
         divEle.appendChild(infoEle)
         divEle.appendChild(buttonHideEle)
-        divEle.appendChild(buttonEle)
+        divEle.appendChild(buttonOneEle)
         divEle.appendChild(buttonDoubleEle)
+        divEle.appendChild(buttonToggleZeroColumn)
         return divEle;
     }
 
@@ -158,6 +181,7 @@
         infoEle.style.position = "absolute";
         // 信息元素添加边框
         infoEle.style.border = "1px solid black"
+        infoEle.style.opacity = "50%"
         infoEle.style.backgroundColor = "red"
         return infoEle;
     }
@@ -168,12 +192,18 @@
     function requireAvailableNumber() {
         // 获取加号列表
         let adds = document.querySelectorAll(".adda");
+        let subs = document.querySelectorAll(".suba");
         for (let i = 0; i < adds.length; i++) {
             // for (let i = 5; i < 10; i++) {
-            let ele = adds[i];
-            ele.dispatchEvent(getEvt(EVENT_MOUSE_ENTER))
-            ele.dispatchEvent(getEvt(EVENT_MOUSE_CLICK))
-            ele.dispatchEvent(getEvt(EVENT_MOUSE_OUT))
+            let addEle = adds[i];
+            let subEle = subs[i];
+            addEle.dispatchEvent(getEvt(EVENT_MOUSE_ENTER))
+            addEle.dispatchEvent(getEvt(EVENT_MOUSE_CLICK))
+            addEle.dispatchEvent(getEvt(EVENT_MOUSE_OUT))
+
+            subEle.dispatchEvent(getEvt(EVENT_MOUSE_ENTER))
+            subEle.dispatchEvent(getEvt(EVENT_MOUSE_CLICK))
+            subEle.dispatchEvent(getEvt(EVENT_MOUSE_OUT))
         }
     }
 
@@ -236,13 +266,13 @@
                     }
                 } else {
                     ele.style.backgroundColor = "red"
-                    let infoEle = getErrorEle("订购量未能成功修改，请手动修改！")
+                    let infoEle = getErrorEle("订购量未能成功修改，请刷新页面后重新点击一件获取按钮！")
                     ele.appendChild(infoEle);
                 }
             } else { // 获取可用量失败，在当前行提示需要手动操作
                 ele.style.backgroundColor = "yellow"
                 // 创建信息元素
-                let infoEle = getErrorEle("获取可用量失败，请手动修改！")
+                let infoEle = getErrorEle("获取可用量失败，请刷新页面后重新点击一键获取按钮！")
                 // 将信息元素显示在当前行
                 ele.appendChild(infoEle);
             }
@@ -262,7 +292,6 @@
         totalCount = 0;
         // 请求订烟数量
         setTimeout(function () {
-            requireAvailableNumber();
             // 根据数量调整订购量
             setActualNumberByLimit(times);
             alert("总计订购" + totalCount + "条烟")
@@ -271,10 +300,11 @@
             btn1.style.cursor = "pointer"
             btn2.disabled = false;
             btn2.style.cursor = "pointer"
-        },0)
+        }, 0)
     }
 
     window.addEventListener('load', function () {
+        requireAvailableNumber();
         document.body.appendChild(createUI())
     });
 
