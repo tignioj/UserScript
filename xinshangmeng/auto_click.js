@@ -18,6 +18,113 @@
     const EVENT_MOUSE_CLICK = "click"
     var totalCount = 0; // 总计多少条烟
 
+    //利用Object.assign 改变css
+    /**
+     * 举例
+     * setStylesOnElement({
+     *      border: "1px solid red",
+     *      float: "right",
+     *      cursor:'pointer',
+     * }, ele1,ele2);
+     * @param styles
+     * @param elements
+     */
+    let setStylesOnElement = function (styles, ...elements
+        ) {
+            for (var i = 0; i < elements.length; i++) {
+                Object.assign(elements[i].style, styles);
+            }
+        }
+    ;
+
+    // 创建UI
+    function createUI() {
+        // 创建窗体
+        let divEle = document.createElement("div");
+        setStylesOnElement({
+            position: "fixed",
+            zIndex: 9999,
+            top: "5%",
+            left: "50%",
+            transform: "translate(-50%, 0%)",
+        }, divEle);
+        // 显示信息
+        let infoEle = document.createElement("div")
+        infoEle.textContent = "一键点满需求量"
+        setStylesOnElement({
+            boxShadow: "black 4px 4px 3px",
+            backgroundColor: "white",
+            borderRadius: "2px",
+            border: "1px solid black",
+            fontSize: "1.3em"
+        }, infoEle)
+        infoEle.id = "auto_click_info_ele"
+
+
+        // 创建按钮
+        let buttonEle = document.createElement("button");
+        buttonEle.id = "auto_click_button_ele_1"
+        buttonEle.textContent = "一键1倍"
+        buttonEle.addEventListener("click", function () {
+            oneClickOrder(1);
+        });
+        setStylesOnElement({
+            position: "relative",
+            cursor: "pointer",
+            fontSize: "3em",
+            boxShadow: "4px 4px 3px black"
+        }, buttonEle);
+
+        let buttonDoubleEle = document.createElement("button");
+        buttonDoubleEle.id = "auto_click_button_ele_2"
+        buttonDoubleEle.textContent = "一键2倍"
+        buttonDoubleEle.addEventListener("click", function () {
+            oneClickOrder(2)
+        });
+        setStylesOnElement({
+            position: "relative",
+            cursor: "pointer",
+            fontSize: "3em",
+            boxShadow: "4px 4px 3px black"
+        }, buttonDoubleEle);
+
+        // 隐藏按钮
+        const buttonHideEle = document.createElement("button");
+        buttonHideEle.textContent = "隐藏"
+        setStylesOnElement({
+            position: "absolute",
+            cursor: "pointer",
+            top: "0px",
+            right: "0px",
+            fontSize: "1.2em"
+        }, buttonHideEle)
+        buttonHideEle.onclick = function () {
+            if (buttonHideEle.textContent === "隐藏" ) {
+                buttonEle.style.display = "none"
+                buttonDoubleEle.style.display = "none"
+                divEle.style.opacity = "30%"
+                buttonHideEle.textContent = "显示"
+            } else {
+                buttonEle.style.display = "inline-block"
+                buttonDoubleEle.style.display = "inline-block"
+                divEle.style.opacity = "100%"
+                buttonHideEle.textContent = "隐藏"
+            }
+        }
+
+        // 添加元素到窗体
+        divEle.appendChild(infoEle)
+        divEle.appendChild(buttonHideEle)
+        divEle.appendChild(buttonEle)
+        divEle.appendChild(buttonDoubleEle)
+        return divEle;
+    }
+
+    function showInfo(msg) {
+        document.getElementById("auto_click_info_ele").innerText = msg;
+    }
+
+
     /**
      * 获取事件
      * @param ev 事件常量
@@ -81,8 +188,9 @@
      *
      * 验证
      *  根据订购量和可用量判断是否操作成功
+     *  @param times 几倍订购量
      */
-    function setActualNumberByLimit() {
+    function setActualNumberByLimit(times) {
         let rows = document.querySelectorAll(".xsm-utable-body");
         for (let i = 0; i < rows.length; i++) {
             let ele = rows[i];
@@ -99,7 +207,7 @@
             let eleInput = ele.getElementsByClassName("xsm-order-list-shuru-input")[0];
             // 没有显示可用量，说明上一轮的点击失败了
             if (limitNum.trim() !== '--') {
-                eleInput.value = String(parseInt(limitNum) * 2);
+                eleInput.value = String(parseInt(limitNum) * times);
                 // 移动鼠标
                 adda.dispatchEvent(getEvt(EVENT_MOUSE_OUT))
 
@@ -114,7 +222,8 @@
                  * 失败两种：
                  *   1. 可用量 == '--', 这是在第一次请求的时候就没有请求成功
                  *   2. 订购量 == '--' ,说明没有操作成功
-                 * 这里把失败都显示为红色。
+                 * 这里把请求失败设置为黄色:可能是网络原因
+                 * 把请求后，元素修改失败设置为红色: 可能是程序的bug
                  */
                 let orderNum = ele.getElementsByClassName("cgt-col-ord")[0].textContent
                 if (orderNum !== '--' && orderNum === limitNum) {
@@ -140,12 +249,33 @@
         }
     }
 
-    window.addEventListener('load', function () {
+
+    function oneClickOrder(times) {
+        showInfo("请稍后...")
+        const btn1 = document.getElementById("auto_click_button_ele_1");
+        const btn2 = document.getElementById("auto_click_button_ele_2");
+        btn1.disabled = true
+        btn1.style.cursor = "wait"
+        btn2.disabled = true
+        btn2.style.cursor = "wait"
+
+        totalCount = 0;
         // 请求订烟数量
-        requireAvailableNumber();
-        // 根据数量调整订购量
-        setActualNumberByLimit();
-        alert("总计订购" + totalCount + "条烟")
+        setTimeout(function () {
+            requireAvailableNumber();
+            // 根据数量调整订购量
+            setActualNumberByLimit(times);
+            alert("总计订购" + totalCount + "条烟")
+            showInfo("已获取" + totalCount + "条烟")
+            btn1.disabled = false;
+            btn1.style.cursor = "pointer"
+            btn2.disabled = false;
+            btn2.style.cursor = "pointer"
+        },0)
+    }
+
+    window.addEventListener('load', function () {
+        document.body.appendChild(createUI())
     });
 
 })();
